@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemma-3n-E4B API 測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, button { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>Gemma-3n-E4B API 測試介面</h1>
+    
+    <div class="form-group">
+        <label>API Key:</label>
+        <input type="password" id="apiKey" placeholder="請輸入 API Key">
+    </div>
+    
+    <h2>純文字生成測試</h2>
+    <div class="form-group">
+        <label>輸入文字:</label>
+        <textarea id="textInput" rows="4" placeholder="請輸入您想要的提示文字..."></textarea>
+    </div>
+    
+    <div class="form-group">
+        <label>最大令牌數:</label>
+        <input type="number" id="maxTokens" value="128" min="1" max="512">
+    </div>
+    
+    <button onclick="testTextGeneration()">生成文字</button>
+    
+    <h2>音訊 + 文字生成測試</h2>
+    <div class="form-group">
+        <label>選擇音訊檔案:</label>
+        <input type="file" id="audioFile" accept=".wav,.mp3,.flac,.m4a,.ogg">
+    </div>
+    
+    <div class="form-group">
+        <label>附加文字:</label>
+        <textarea id="audioText" rows="2" placeholder="請描述您希望對音訊做什麼處理..."></textarea>
+    </div>
+    
+    <button onclick="testAudioGeneration()">處理音訊</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8444';
+        
+        async function makeRequest(endpoint, options) {
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showResult('請先輸入 API Key', 'error');
+                return;
+            }
+            
+            const headers = {
+                'Authorization': `Bearer ${apiKey}`,
+                ...options.headers
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    return data;
+                } else {
+                    throw new Error(data.detail || '請求失敗');
+                }
+            } catch (error) {
+                showResult(`錯誤: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        async function testTextGeneration() {
+            const text = document.getElementById('textInput').value;
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            
+            if (!text) {
+                showResult('請輸入文字', 'error');
+                return;
+            }
+            
+            showResult('正在生成文字...', '');
+            
+            try {
+                const result = await makeRequest('/generate/text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        max_tokens: maxTokens,
+                        temperature: 0.7
+                    })
+                });
+                
+                showResult(`
+                    <h3>生成結果:</h3>
+                    <p><strong>生成文字:</strong> ${result.generated_text}</p>
+                    <p><strong>處理時間:</strong> ${result.processing_time.toFixed(2)} 秒</p>
+                    <p><strong>模型版本:</strong> ${result.model_version}</p>
+                `, 'success');
+                
+            } catch (error) {
+                // 錯誤已在 makeRequest 中處理
+            }
+        }
+        
+        async function testAudioGeneration() {
+            const audioFile = document.getElementById('audioFile').files[0];
+            const text = document.getElementById('audioText').value;
+            
+            if (!audioFile) {
+                showResult('請選擇音訊檔案', 'error');
+                return;
+            }
+            
+            if (!text) {
+                showResult('請輸入附加文字', 'error');
+                return;
+            }
+            
+            showResult('正在處理音訊...', '');
+            
+            try {
+                const formData = new FormData();
+                formData.append('audio_file', audioFile);
+                formData.append('text', text);
+                formData.append('max_tokens', '128');
+                formData.append('temperature', '0.7');
+                
+                const result = await makeRequest('/generate/audio-text', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                showResult(`
+                    <h3>音訊處理結果:</h3>
+                    <p><strong>生成文字:</strong> ${result.generated_text}</p>
+                    <p><strong>處理時間:</strong> ${result.processing_time.toFixed(2)} 秒</p>
+                    <p><strong>模型版本:</strong> ${result.model_version}</p>
+                `, 'success');
+                
+            } catch (error) {
+                // 錯誤已在 makeRequest 中處理
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = `result ${type}`;
+        }
+        
+        // 頁面載入時進行健康檢查
+        window.onload = async function() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                console.log('服務狀態:', data);
+            } catch (error) {
+                console.log('無法連接到服務');
+            }
+        };
+    </script>
+</body>
+</html>
