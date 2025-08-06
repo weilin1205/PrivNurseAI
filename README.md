@@ -1,12 +1,11 @@
-# PrivNurse AI: Revolutionizing Clinical Documentation with Privacy-First On-Device Intelligence
+# PrivNurse AI: Revolutionizing Clinical Documentation with On-Device Intelligence
 > Empowering Healthcare Professionals with Secure, Offline-Ready AI that Transforms Medical Documentation While Keeping Patient Data Protected
 
-## **Project Description**
-
-PrivNurse AI is an end-to-end, on-premises artificial intelligence system designed to combat one of the most pressing issues in modern healthcare: clinician burnout driven by administrative overload. By harnessing the unparalleled on-device efficiency and multimodal capabilities of Google's Gemma 3n, PrivNurse AI empowers nurses and physicians by automating and accelerating the creation of complex clinical documentation. The system features three core modules: an intelligent **Consultation Note Summarizer** that uses Chain-of-Thought reasoning to discern clinical priorities, a structured **Discharge Note Summarizer**, and a hands-free **Speech-to-Text Nursing Note Transcriber**. Deployed entirely within a hospital's secure network, PrivNurse AI guarantees patient data privacy (HIPAA/GDPR compliance) while delivering clinically-validated, explainable, and continuously improving AI assistance, directly at the point of care.
+## **🚀 Executive Summary**
 
 <img src="/assets/PrivNurseAI_architecture_0802.png" alt="Architecture" style="zoom:85%;" />
 
+PrivNurse AI is an end-to-end, on-premises artificial intelligence system designed to combat one of the most pressing issues in modern healthcare: clinician burnout driven by administrative overload. By harnessing the unparalleled on-device efficiency and multimodal capabilities of Google's Gemma 3n, PrivNurse AI empowers nurses and physicians by automating and accelerating the creation of complex clinical documentation. The system features three core modules: an intelligent **Consultation Note Summarizer** that uses Chain-of-Thought reasoning to discern clinical priorities, a structured **Discharge Note Summarizer**, and a hands-free **Speech-to-Text Nursing Note Transcriber**. Deployed entirely within a hospital's secure network, PrivNurse AI guarantees patient data privacy (HIPAA/GDPR compliance) while delivering clinically-validated, explainable, and continuously improving AI assistance, directly at the point of care.
 
 ## The Training Pipeline: Forging a Clinical Expert
 
@@ -32,7 +31,7 @@ This is the core of our innovation. We create high-quality synthetic training da
 
 #### **Step 3: Parameter-Efficient Fine-Tuning (PEFT)**
 We load the **Gemma-3n-E4B** base model and our augmented training dataset. The fine-tuning process is powered by cutting-edge tools for maximum efficiency:
-*   **Unsloth:** We integrate the Unsloth library to significantly speed up training (up to 2x faster) and reduce VRAM usage by over 50%, making iterative fine-tuning highly practical.
+*   **Unsloth:** We integrate the Unsloth library to significantly speed up training (up to 1.5x faster) and reduce VRAM usage by over 50%, making iterative fine-tuning highly practical.
 *   **QLoRA (Quantized Low-Rank Adaptation):** We employ SFT (Supervised Fine-Tuning) with the QLoRA technique. This freezes the pretrained model weights and trains a small number of adaptable "LoRA" weights, drastically lowering the computational and memory requirements for training without sacrificing performance.
 
 **Training Hyperparameters:**
@@ -40,7 +39,6 @@ We load the **Gemma-3n-E4B** base model and our augmented training dataset. The 
 | Hyperparameter | Expert Agent-A1 | Expert Agent-A2 | Expert Agent-B1 | Expert Agent-B2 |
 | :--- | :--- | :--- | :--- | :--- |
 | Base Model | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it |
-| QLoRA Configuration | | | | |
 | LoRA `r` | `32` | `32` | `32` | `32` |
 | LoRA `alpha`| `64` | `64` | `64` | `32` |
 | LoRA Dropout | `0` | `0` | `0` | `0` | 
@@ -48,14 +46,14 @@ We load the **Gemma-3n-E4B** base model and our augmented training dataset. The 
 | Learning Rate| `1e-3` | `1e-3` | `2e-4` | `2e-4` |
 | Total Batch Size | `96` | `96` | `32` | `32` |
 | Epochs | `6` | `6` | `2` | `1` |
-| Optimizer | `adamW_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused` |
+| Optimizer | `adamw_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused` |
 | Max Sequence Length | `8192` | `8192` | `32768` | `32768` |
 | LR Scheduler Type | `linear` |`linear` |`linear` |`linear` |
 
 #### **Step 4: Model Finalization for Deployment**
 Once training is complete, the LoRA adapter is merged with the base model to create a full, fine-tuned model. To optimize for on-premises inference, we perform two final steps:
 1.  **Format Conversion:** The model is converted from `safetensors` to the **GGUF (GPT-Generated Unified Format)**, which is highly optimized for fast loading and inference with frameworks like Ollama.
-2.  **Quantization:** We use `llama.cpp` to create quantized versions of the model (e.g., Q8_0, Q4_0). This dramatically reduces the model's size and VRAM footprint, making it runnable on a wider range of hospital hardware, from dedicated servers to standard clinician workstations.
+2.  **Quantization:** We use `llama.cpp` to create quantized versions of the model (e.g., Q8_0). This dramatically reduces the model's size and VRAM footprint, making it runnable on a wider range of hospital hardware, from dedicated servers to standard clinician workstations.
 
 
 ## The Application Pipeline: AI at the Clinician's Fingertips
@@ -85,7 +83,25 @@ For summarization tasks, we utilize a sophisticated dual-agent architecture depl
 To leverage Gemma 3n's native multimodal capabilities, which Ollama does not yet support for audio, we built a separate microservice.
 *   **Unlocking Multimodality:** We run the `Nursing Voice Transcription Model` using the **Hugging Face Transformers** library. A **FastAPI** backend serves the model, providing a simple API endpoint for the front end.
 *   **Prompt Engineering for Accuracy:** The backend is engineered with a specific system prompt to prime the model for the clinical context:
-    > `"You are an expert medical transcriber in a clinical setting. A nurse is dictating a nursing note. Your task is to accurately transcribe the provided audio into a clean, written nursing record. Pay close attention to medical terminology."`
+```
+Please transcribe the provided audio into accurate written text. This is a medical/healthcare context where the speaker is a nursing professional.
+
+## Instructions:
+1. Convert the speech to text as accurately as possible
+2. The speaker is a nurse, so expect medical terminology and nursing-related content
+3. You may make minor adjustments to improve clarity and flow while maintaining the original meaning
+4. Correct obvious speech errors, filler words, or unclear pronunciations to create a coherent transcript
+5. Maintain professional medical language and terminology
+6. Ensure the final transcript is readable and well-structured
+
+## Output Requirements:
+- Provide ONLY the clean, transcribed text
+- Do not add commentary, explanations, or additional content
+- Do not include timestamps or speaker labels
+- Present the transcript as a flowing, coherent text document
+
+Please transcribe the audio now.
+```
 *   **Workflow:** The frontend captures audio, sends it to the FastAPI endpoint, and displays the returned text. This simple but powerful feature liberates clinicians' hands and integrates seamlessly into their workflow.
 
 #### **The Human-in-the-Loop: Confirmation and Feedback**
