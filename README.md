@@ -40,12 +40,12 @@ We load the **Gemma-3n-E4B** base model and our augmented training dataset. The 
 | :--- | :--- | :--- | :--- | :--- |
 | Base Model | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it |
 | LoRA `r` | `32` | `32` | `32` | `32` |
-| LoRA `alpha`| `64` | `64` | `64` | `32` |
+| LoRA `alpha`| `64` | `64` | `32` | `64` |
 | LoRA Dropout | `0` | `0` | `0` | `0` | 
 | Quantization Bits | `4-bit` | `4-bit` | `4-bit` | `4-bit` |
 | Learning Rate| `1e-3` | `1e-3` | `2e-4` | `2e-4` |
 | Total Batch Size | `96` | `96` | `32` | `32` |
-| Epochs | `6` | `6` | `2` | `1` |
+| Epochs | `6` | `6` | `1` | `2` |
 | Optimizer | `adamw_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused` |
 | Max Sequence Length | `8192` | `8192` | `32768` | `32768` |
 | LR Scheduler Type | `linear` |`linear` |`linear` |`linear` |
@@ -75,8 +75,8 @@ For summarization tasks, we utilize a sophisticated dual-agent architecture depl
 
 1.  **Input Formatting:** For Task B (Discharge Summary), which involves time-sensitive data like lab reports and nursing notes, a `Temporal Data Processor` first sorts these records chronologically. All records are then passed to an `XML Formatter` that wraps the data in semantic tags (e.g., `<PhysicianDiagnosis>`, `<LabReport>`). This structured format helps the LLM better comprehend the complex medical data.
 2.  **Agent Interaction:**
-    *   **Agent 2 (The Summarizer):** First, `Nursing Record Summarization Model` (A2/B2) receives the formatted data and generates the clinical summary.
-    *   **Agent 1 (The Highlighter):** The generated summary and the original source text are passed to the `Medical Record Key Highlighting Model` (A1/B1). This agent's sole purpose is to identify which keywords in the source text support the summary. It outputs its findings as a JSON object mapping summary sentences to source keywords.
+    *   **Agent 1 (The Summarizer):** First, `Nursing Record Summarization Model` (A1/B1) receives the formatted data and generates the clinical summary.
+    *   **Agent 2 (The Highlighter):** The generated summary and the original source text are passed to the `Medical Record Key Highlighting Model` (A2/B2). This agent's sole purpose is to identify which keywords in the source text support the summary. It outputs its findings as a JSON object mapping summary sentences to source keywords.
 3.  **Output Processing:** The `JSON Match Processor` uses this JSON to apply highlighting to the original medical record in the user interface. The final output presented to the clinician is the AI-generated summary alongside the source text with key evidence highlighted, providing immediate and intuitive explainability.
 
 #### **Task C: Nursing Note Speech-to-Text**
