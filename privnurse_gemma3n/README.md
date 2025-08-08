@@ -113,7 +113,8 @@ tmux list-panes -t privnurse:0
 ```bash
 # Clone Repository
 git https://github.com/weilin1205/PrivNurseAI.git
-cd privnurse
+
+cd PrivNurseAI/privnurse_gemma3n
 ```
 
 ### 2. Tmux Work Environment Setup
