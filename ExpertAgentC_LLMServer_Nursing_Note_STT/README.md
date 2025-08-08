@@ -304,9 +304,8 @@ gemma-audio-api/
 ├── test_api.py            # API testing script
 ├── test_frontend.html     # Web test interface
 ├── requirements.txt       # Python dependencies
-├── config.env            # Environment configuration
-├── gemma-api.service     # Systemd service file
-└── README.md             # This file
+├── config.env             # Environment configuration
+└── gemma-api.service      # Systemd service file
 ```
 
 ## System Service Setup (Optional)
