@@ -3,6 +3,7 @@
 A production-ready FastAPI service for Google's Gemma-3n-E4B model with full audio processing capabilities. This API provides multimodal text generation supporting both text-only and audio+text inputs.
 
 ![Nursing Note STT Demo](/assets/nursing_note_stt_demo.png)
+**[🎯 Project Demo Video](https://youtu.be/gfFrrqFYB-s?t=133)**
 
 ## ✨Features
 
