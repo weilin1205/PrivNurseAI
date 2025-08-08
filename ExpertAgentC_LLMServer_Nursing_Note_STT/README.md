@@ -1,4 +1,4 @@
-# PrivNurse-Gemma-3n-E4B Audio API
+# PrivNurse Gemma-3n Speech-to-Text Server
 
 A production-ready FastAPI service for Google's Gemma-3n-E4B model with full audio processing capabilities. This API provides multimodal text generation supporting both text-only and audio+text inputs.
 
