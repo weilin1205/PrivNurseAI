@@ -1,5 +1,8 @@
 # 🏥 PrivNurse Environment Setup and Installation Guide
 
+| ![Discharge Note Summarization](..\assets\Discharge_Note_Summarization.png) | ![Consulation Nursing Note_Summarization](..\assets\Consulation_Nursing_Note_Summarization.png)|
+|---|---|
+
 ## 📋 System Architecture Overview
 
 PrivNurse is a complete healthcare system that includes the following four main components:
