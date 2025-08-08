@@ -1,0 +1,24 @@
+FROM ./gemma-3n-privnurse-consult-validation-v1.Q8_0.gguf
+
+TEMPLATE """{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1 }}
+{{- if or (eq .Role "user") (eq .Role "system") }}<start_of_turn>user
+{{ .Content }}<end_of_turn>
+{{ if $last }}<start_of_turn>model
+{{ end }}
+{{- else if eq .Role "assistant" }}<start_of_turn>model
+{{ .Content }}{{ if not $last }}<end_of_turn>
+{{ end }}
+{{- end }}
+{{- end }}"""
+
+PARAMETER num_ctx 32768
+PARAMETER temperature 0.1
+PARAMETER stop "<end_of_turn>"
+PARAMETER stop "<eos>"
+PARAMETER min_p 0.00
+PARAMETER repeat_penalty 1.001
+PARAMETER top_p 0.95
+PARAMETER top_k 64
+
+SYSTEM """Extract the exact phrases or sentences from the [#會診申請單] text that correspond to the information summarized in the [#護理師確認結果]. Present these extracted phrases as an array of strings in JSON format, with the key 'relevant_text'. Do not output anything other than the JSON array."""
