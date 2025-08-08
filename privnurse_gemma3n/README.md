@@ -1,7 +1,9 @@
 # 🏥 PrivNurse Environment Setup and Installation Guide
 
-| ![Discharge Note Summarization](/assets/Discharge_Note_Summarization.png) | ![Consulation Nursing Note_Summarization](/assets/Consulation_Nursing_Note_Summarization.png) |
-|---|---|
+<p align="center">
+  <img src="/assets/Discharge_Note_Summarization.png" width="400">
+  <img src="/assets/Consulation_Nursing_Note_Summarization.png" width="400">
+</p>
 
 ## 📋 System Architecture Overview
 
