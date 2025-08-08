@@ -31,7 +31,7 @@ git clone https://github.com/weilin1205/PrivNurseAI.git
 cd PrivNurseAI/ExpertAgentC_LLMServer_Nursing_Note_STT
 ```
 
-### 2. System Dependencies (optional)
+### 2. System Dependencies
 ```bash
 # Update system
 sudo apt update && sudo apt upgrade -y
