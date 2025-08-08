@@ -19,9 +19,9 @@ A production-ready FastAPI service for Google's Gemma-3n-E4B model with full aud
 - **OS**: Ubuntu 20.04+
 - **Hardware**: 
   - CPU: 8+ cores
-  - RAM: 16GB+ (32GB recommended)
+  - RAM:8GB+ (16GB recommended)
   - GPU: NVIDIA GPU with 8GB+ VRAM (highly recommended)
-  - Storage: 50GB+ available space
+  - Storage: 20GB+ available space
 - **Network**: Stable internet connection (initial model download ~8GB)
 
 ## 🚀 Quick Start
