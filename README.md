@@ -3,8 +3,8 @@
 
 **Authors: Wei-Lin Wen, Yu-Yao Tsai**
 
-1. **[Full Technical Report](https://github.com/weilin1205/PrivNurseAI/blob/main/PrivNurseAI_Technical_Report.pdf)**
-2. **[Project Demo Video](https://youtu.be/gfFrrqFYB-s?si=UwFKngUBT0wq_RlK)**
+1. **Project Demo Video**: [Youtube Demo Link](https://youtu.be/gfFrrqFYB-s?si=UwFKngUBT0wq_RlK)
+2. **Full Technical Report:** [Technical Report Link](https://github.com/weilin1205/PrivNurseAI/blob/main/PrivNurseAI_Technical_Report.pdf)
 3. **Code Repository:** [github.com/weilin1205/PrivNurseAI](https://github.com/weilin1205/PrivNurseAI/tree/main)
 4. **Key Components:** [Speech-to-Text Server](https://github.com/weilin1205/PrivNurseAI/tree/main/ExpertAgentC_LLMServer_Nursing_Note_STT) | [Data Preprocessing](https://github.com/weilin1205/PrivNurseAI/tree/main/Data_Preprocessing) | [Model Fine-tuning](https://github.com/weilin1205/PrivNurseAI/tree/main/FineTuning_Training) | [Teacher-Student Distillation](https://github.com/weilin1205/PrivNurseAI/tree/main/Training_Data_Distillation) | [Implementation](https://github.com/weilin1205/PrivNurseAI/tree/main/privnurse_gemma3n)
 
