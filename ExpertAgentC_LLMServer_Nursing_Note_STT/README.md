@@ -353,4 +353,4 @@ If you encounter issues:
 **⚠️ Note**: This API service includes complete authentication, rate limiting, error handling, and security measures suitable for production use. Please ensure regular updates of dependencies and model versions.
 
 ## 🔒 API Key Security Warning
-**Important**: Your API key will be displayed when starting the service. Keep it secure and never commit it to version control.
+**Important**: Your API key will be displayed when starting the service. Keep it secure.
