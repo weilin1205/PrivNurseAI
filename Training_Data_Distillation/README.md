@@ -15,11 +15,11 @@ This is the core of our innovation. We create high-quality synthetic training da
 
 Follow these steps to prepare training datasets and fine-tune the PrivNurse clinical expert models on your local system.
 
-## Step 1: Generate Training Datasets
+## Generate Training Datasets
 
 Before fine-tuning the models, you need to generate the specialized training datasets using our advanced data augmentation and distillation techniques.
 
-### 1.1 Consultation Note Datasets (Claude-Generated)
+### 1. Consultation Note Datasets (Claude-Generated)
 Generate training data for consultation note tasks using Claude-Sonnet-4's structured reasoning:
 
 ```bash
@@ -30,7 +30,7 @@ python privNurse_consult_validation_claude.py
 python privNurse_consult_summary_claude.py
 ```
 
-### 1.2 Discharge Note Datasets (MedGemma-Generated)
+### 2. Discharge Note Datasets (MedGemma-Generated)
 Generate training data for discharge note tasks using MedGemma-27B-IT distillation:
 
 ```bash
