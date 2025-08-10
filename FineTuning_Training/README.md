@@ -126,7 +126,5 @@ ollama run gemma-3n-privnurse-note-validation-v1 "Please validate this discharge
 ## Next Steps
 
 Once all models are successfully deployed, you can:
-- Integrate them into your clinical application
-- Set up API endpoints for model inference
-- Configure load balancing for production deployment
-- Monitor model performance and collect feedback for future iterations
+1. [Integrate them into the clinical application](https://github.com/weilin1205/PrivNurseAI/tree/main/privnurse_gemma3n)
+2. [Set up API endpoints for audio model inference](https://github.com/weilin1205/PrivNurseAI/tree/main/ExpertAgentC_LLMServer_Nursing_Note_STT)
