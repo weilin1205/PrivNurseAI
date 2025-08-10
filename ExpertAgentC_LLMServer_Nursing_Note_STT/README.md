@@ -339,7 +339,7 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](https:
 ## 📞 Support
 
 If you encounter issues:
-1. Check the [troubleshooting section](#troubleshooting)
+1. Check the [troubleshooting section](#-troubleshooting)
 2. Review [Gemma documentation](https://deepmind.google/models/gemma/)
 3. Check [Transformers documentation](https://huggingface.co/docs/transformers/index)
 4. Open an issue in this repository
