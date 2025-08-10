@@ -30,11 +30,14 @@ We begin with anonymized medical records from our partner hospital. The data und
 
 #### **Step 2: Advanced Data Augmentation**
 This is the core of our innovation. We create high-quality synthetic training data that teaches the model *how* to think, not just *what* to write.
-*   **Medical Structured Chain-of-Thought (MedSCoT) for Task A:** Summarizing consultation notes is the most challenging task, requiring the model to identify the single most urgent reason for the consult amidst extensive patient history. We use **Claude-Sonnet-4** as a "teacher model" to generate step-by-step reasoning paths. For example:
-    > `<thinking>Analysis: Although the patient was admitted for post-operative management of a bone fracture, the main reason for the endocrinology consultation was the acute hyperglycemia control. I must prioritize this in the summary.</thinking>`
-    This explicit reasoning chain, included in the training data, dramatically improves the model's ability to filter clinical noise and enhances its explainability.
+*   **Medical Structured Chain-of-Thought (MedSCoT) for Task A:** Consultation note summarization is a high-complexity task that demands accurate identification of the *primary* consult reason amid extensive and often noisy patient history. Our approach leverages **Claude-Sonnet-4** as a “teacher model” to produce explicit, medically grounded reasoning chains.  
 
-*   **Medical Data Distillation for Task B:** For discharge summaries, which require adherence to a specific structure, we use **MedGemma-27B-IT** as a teacher model. We prompt it to distill full patient histories into summaries covering five key areas: (1) Primary Diagnosis, (2) Lab/Exam Results, (3) Medications, (4) Consultations, and (5) Follow-up Plan. This structured distillation creates a robust dataset for fine-tuning.
+    **Example:**  
+    > `<thinking>Task: Determine the primary reason for the Rehabilitation Medicine consult and formulate a concise summary. Although the patient was admitted for fever and bronchopneumonia, these conditions are less relevant to the consult. The key driver is swelling and pain on the left side of the neck, likely linked to a gymnastics-related sports injury. This musculoskeletal issue falls within Rehabilitation Medicine's scope and should be prioritized in the summary.</thinking>`  
+
+    Integrating this structured reasoning into the training data enables the model to systematically filter irrelevant clinical details, maintain diagnostic focus, and deliver higher explainability in clinical NLP applications.
+
+*   **Medical Data Distillation for Task B:** For discharge summaries, which require strict adherence to predefined medical documentation structure, we employ **MedGemma-27B-IT** as a teacher model. It is instructed to condense full patient records into summaries covering five essential elements: (1) Primary Diagnosis, (2) Lab/Exam Results, (3) Medications, (4) Consultations, and (5) Follow-up Plan. This structured distillation process produces high-fidelity datasets optimized for fine-tuning models in real-world clinical environments.
 
 #### **Step 3: Parameter-Efficient Fine-Tuning (PEFT)**
 We load the **Gemma-3n-E4B** base model and our augmented training dataset. The fine-tuning process is powered by cutting-edge tools for maximum efficiency:
