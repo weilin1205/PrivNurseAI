@@ -49,7 +49,7 @@ def process_row(index, row):
 
 # Input and output file paths
 input_file = '會診紀錄-1.csv'
-output_file = 'output_test.csv'
+output_file = 'Datasets-consult-validation.csv'
 
 # Read all rows from input CSV
 with open(input_file, 'r', encoding='utf-8-sig') as infile:

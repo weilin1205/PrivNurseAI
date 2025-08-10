@@ -431,7 +431,8 @@ The following 7 samples are provided as a reference for the output style, but th
     <answer>
     病患因右臂皮膚疹伴隨脫屑、脫皮、小孔洞和滲液，申請皮膚科會診。皮膚科李壹施醫師回覆診斷為接觸性皮膚炎併發ids反應，建議使用Elomet外用藥每日兩次，並嘗試減少口服Prednisolone劑量。
     </answer>
-</Sample Output-7>"""
+</Sample Output-7>
+"""
 
 def safe_print(*args, **kwargs):
     with print_lock:
@@ -463,7 +464,7 @@ def process_row(index, row):
 
 # Input and output file paths
 input_file = 'Datasets-CSC01.csv'
-output_file = 'output_CSC.csv'
+output_file = 'Datasets-consult-summary.csv'
 
 # Read all rows from input CSV
 with open(input_file, 'r', encoding='utf-8-sig') as infile:
