@@ -15,7 +15,7 @@ Once training is complete, the LoRA adapter is merged with the base model to cre
 2.  **Quantization:** We use `llama.cpp` to create quantized versions of the model (e.g., Q8_0). This dramatically reduces the model's size and VRAM footprint, making it runnable on a wider range of hospital hardware, from dedicated servers to standard clinician workstations.
 
 
-# 🚀 Quich Start
+# 🚀 Quick Start
 
 Follow these steps to fine-tune and deploy the PrivNurse clinical expert models on your local system.
 
