@@ -1,4 +1,4 @@
-name: ft3
+name: privnurse_finetune
 channels:
   - defaults
   - https://repo.anaconda.com/pkgs/main
