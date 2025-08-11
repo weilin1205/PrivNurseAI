@@ -1,413 +1,177 @@
-# 🏥 PrivNurse Environment Setup and Installation Guide
+# 🏥 PrivNurse AI - Medical Information System
 
-## 📋 System Architecture Overview
+A comprehensive medical information system with AI-powered assistance for patient management, consultations, and medical record handling.
 
-PrivNurse is a complete healthcare system that includes the following four main components:
+## 🏗️ System Architecture
 
-* **Frontend**: Next.js web application
-* **Backend**: Python Flask/FastAPI server
-* **Database**: MySQL database
-* **AI Model**: Ollama local large language model
+The system consists of:
+- **Backend**: FastAPI-based REST API with MySQL database
+- **Frontend**: Next.js React application with Material-UI and Chakra UI
+- **AI Integration**: Ollama for local LLM inference and Gemma audio processing
 
----
+## 📋 Prerequisites
 
-## 🖥️ Using Tmux to Manage Services
+- Node.js 18+ and npm
+- Python 3.8+
+- MySQL 5.7+ or compatible
+- Ollama (for AI features)
+- FFmpeg (for audio processing)
 
-### Tmux Split-Screen Configuration
+## ⚙️ Installation
 
-After completing the installation of all components, use tmux to manage frontend and backend services simultaneously:
+### 🖥️ Backend Setup
 
-#### 1. Create and Configure a Tmux Session
-
+1. Navigate to the backend directory:
 ```bash
-# Create a new tmux session (if not already created)
-tmux new-session -d -s privnurse
-
-# Enter the tmux session
-tmux attach-session -t privnurse
-
-# Rename the current window
-tmux rename-window 'PrivNurse'
+cd backend
 ```
 
-#### 2. Split the Screen
-
+2. Create a Python virtual environment:
 ```bash
-# Vertically split the screen (left/right)
-# Inside tmux, press Ctrl+B then %
-# Or run the following command
-tmux split-window -h
-
-# Horizontally split the right panel (top/bottom)
-# First move to the right panel: Ctrl+B then press →
-# Then press Ctrl+B then "
-tmux split-window -v
-```
-
-#### 3. Panel Configuration and Service Startup
-
-After configuration, there will be three panels:
-
-* **Left panel**: Database management and monitoring
-* **Top right panel**: Backend service
-* **Bottom right panel**: Frontend service
-
-```bash
-# Panel 1 (left) - Database monitoring
-# Move to left panel: Ctrl+B then press ←
-docker ps | grep mysql
-docker logs -f privnurse_mysql
-
-# Panel 2 (top right) - Backend service
-# Move to top right panel: Ctrl+B then press ↑
-cd /path/to/privnurse
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On Unix/macOS:
 source venv/bin/activate
-python3 local_server.py
-
-# Panel 3 (bottom right) - Frontend service
-# Move to bottom right panel: Ctrl+B then press ↓
-cd /path/to/privnurse
-npm run start
 ```
 
-#### 4. Common Tmux Shortcuts
-
-| Shortcut             | Function                                    |
-| -------------------- | ------------------------------------------- |
-| `Ctrl+B` → `%`       | Vertical split                              |
-| `Ctrl+B` → `"`       | Horizontal split                            |
-| `Ctrl+B` → `←/→/↑/↓` | Move between panels                         |
-| `Ctrl+B` → `x`       | Close current panel                         |
-| `Ctrl+B` → `d`       | Detach from session (services keep running) |
-| `Ctrl+B` → `c`       | Create a new window                         |
-| `Ctrl+B` → `,`       | Rename window                               |
-
-#### 5. Service Management Commands
-
+3. Install dependencies:
 ```bash
-# View all tmux sessions
-tmux list-sessions
-
-# Attach to an existing session
-tmux attach-session -t privnurse
-
-# Detach from a session (services keep running)
-# Inside tmux: press Ctrl+B then d
-
-# Completely terminate a session
-tmux kill-session -t privnurse
-
-# View windows in a session
-tmux list-windows -t privnurse
-
-# View panes in a specific window
-tmux list-panes -t privnurse:0
-```
-
----
-
-## 🚀 Initial Setup
-
-### 1. File Preparation
-
-```bash
-# Clone Repository
-git https://github.com/weilin1205/PrivNurseAI.git
-
-cd PrivNurseAI/privnurse_gemma3n
-```
-
-### 2. Tmux Work Environment Setup
-
-```bash
-# Create a new tmux session
-tmux new-session -d -s privnurse
-
-# Enter the tmux session
-tmux attach-session -t privnurse
-```
-
----
-
-## 💻 Frontend Setup (Next.js)
-
-### Environment Configuration
-
-1. **Copy environment configuration file**
-
-   ```bash
-   cp .env.local.example .env.local
-   ```
-
-2. **Edit environment variables**
-
-   ```bash
-   nano .env.local
-   ```
-
-   Set the content:
-
-   ```
-   NEXT_PUBLIC_API_URL=http://YOUR_SERVER_IP:8000
-   ```
-
-   > 💡 Replace `YOUR_SERVER_IP` with the actual server IP address, do not add a slash after the URL
-   > 💡 The downloaded file has port 8080 by default, remember to change it
-
-3. **Firewall Configuration**
-
-   ```bash
-   # Ensure the firewall allows access to relevant ports
-   sudo ufw allow 8087  # Frontend port (can be adjusted in package.json)
-   sudo ufw allow 8000  # Backend port (can be changed in local_server.py line 34)
-   ```
-
-### Installation and Startup
-
-```bash
-# Install dependencies
-npm install
-
-# Build the project
-npm run build
-
-# Start the frontend service
-npm run start
-```
-
----
-
-## 🐍 Backend Setup (Python)
-
-### Environment Configuration
-
-1. **Copy environment configuration file**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **Edit database configuration**
-
-   ```bash
-   nano .env
-   ```
-
-   Set the content:
-
-   ```
-   MYSQL_USER=
-   MYSQL_PASSWORD=
-   MYSQL_HOST=localhost
-   MYSQL_PORT=3307
-   MYSQL_DB=inference_db
-   ```
-
-### Python Environment Setup
-
-#### Method 1: Use existing venv
-
-The downloaded files already include a venv
-
-```bash
-# Activate virtual environment
-source venv/bin/activate  # Linux/Mac
-
-# Start backend server
-python3 local_server.py
-```
-
-#### Method 2: Create a new venv (if Method 1 fails)
-
-```bash
-# Remove old virtual environment
-rm -rf venv
-
-# Create a new virtual environment
-python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate  # Linux/Mac
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Start backend server
-python3 local_server.py
 ```
 
----
-
-## 🗄️ Database Setup (MySQL)
-
-### Prerequisites
-
-Ensure Docker is installed:
-
-* [Docker Installation Guide](https://weilin1205.github.io/posts/docker/)
-
-### Installation and Startup
-
+4. Configure environment variables:
 ```bash
-# Start MySQL container
-docker run -d \
-  --name privnurse_mysql \
-  -e MYSQL_ROOT_PASSWORD=my-secret-pw \
-  -e MYSQL_DATABASE=inference_db \
-  -p 3307:3306 \
-  --restart unless-stopped \
-  mysql:latest
+cp .env.example .env
 ```
 
-> ⚠️ **Important**: Replace `my-secret-pw` with a secure password and fill it in the `.env` file
+Edit `.env` with your configuration:
+```env
+# MySQL Database Configuration
+MYSQL_USER=root
+MYSQL_PASSWORD=your_password
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DB=inference_db
 
----
+# Ollama API Configuration
+OLLAMA_BASE_URL=http://localhost:11434
 
-## 🤖 AI Model Setup (Ollama)
+# Gemma Audio API Configuration (optional)
+GEMMA3N_API_KEY=your-gemma-api-key
+GEMMA3N_API_URL=your-gemma-api-url
 
-### Install Ollama
+# JWT Configuration
+JWT_SECRET_KEY=your-secret-key-here
 
+# Demo Mode Configuration
+DEMO_MODE=false
+AUTO_LOGIN_ENABLED=false
+AUTO_LOGIN_USERNAME=admin
+```
+
+5. Start the backend server:
 ```bash
-# Run automatic installation script
-curl -fsSL https://ollama.com/install.sh | sh
+python main.py
 ```
 
-### Model Download and Configuration (Example)
+### 💻 Frontend Setup
 
+1. Navigate to the frontend directory:
 ```bash
-# Download summary model (name contains "summary")
-ollama pull llama2-summary
-
-# Download validation model (name contains "validation")
-ollama pull llama2-validation
+cd frontend
 ```
 
----
-
-## 🎯 System Usage Instructions
-
-### Model Selection Rules
-
-After installation, the system's model page will display two selection areas:
-
-1. **Summary model field**
-
-   * Displays Ollama models with names containing `summary`
-   * Used for document summarization
-
-2. **Highlight model field**
-
-   * Displays Ollama models with names containing `validation`
-   * Used for content validation and annotation
-
-### Startup Order
-
-It is recommended to use tmux to manage the service startup order:
-
-1. **Start database service** (left panel)
-
-   ```bash
-   docker start privnurse_mysql
-   ```
-
-2. **Start backend service** (top right panel)
-
-   ```bash
-   source venv/bin/activate
-   python3 local_server.py
-   ```
-
-3. **Start frontend service** (bottom right panel)
-
-   ```bash
-   npm run start
-   ```
-
-4. **Check Ollama service**
-
-   ```bash
-   ollama serve  # If not already running
-   ```
-
-### Access the System
-
-* Frontend page: `http://localhost:8087`
-* Backend API: `http://localhost:8000`
-* Database: `localhost:3307`
-
-### Port Configuration
-
-* **Frontend port 8087**: adjustable in `package.json` scripts
-* **Backend port 8000**: changeable in `local_server.py` line 34
-* **Database port 3307**: avoids conflict with default MySQL port
-
----
-
-## 🔧 Common Troubleshooting
-
-### Port Conflicts
-
+2. Install dependencies:
 ```bash
-# Check port usage
-sudo netstat -tlnp | grep :8087
-sudo netstat -tlnp | grep :8000
-sudo netstat -tlnp | grep :3307
-
-# To modify port settings:
-# Frontend: edit start script in package.json
-# Backend: edit line 34 in local_server.py
+npm install
 ```
 
-### Service Status Check
-
+3. Configure environment variables:
 ```bash
-# Check Docker container status
-docker ps
-
-# Check Ollama service
-ollama list
-
-# Check Python processes
-ps aux | grep python
-
-# Check all panel statuses in tmux
-tmux list-panes -t privnurse -F "#{pane_index}: #{pane_current_command}"
+cp .env.local.example .env.local
 ```
 
-### Log Viewing
+Edit `.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
+4. Start the development server:
 ```bash
-# View Docker container logs
-docker logs privnurse_mysql
-
-# View Next.js logs
-npm run start --verbose
-
-# In tmux, view service logs in real-time
-# Left panel: docker logs -f privnurse_mysql
-# Top right panel: backend service console output
-# Bottom right panel: frontend service console output
+npm run dev
 ```
 
-### Tmux Troubleshooting
+The application will be available at `http://localhost:3000`
 
+## 🚀 Running the System
+
+### 🧪 Development Mode
+
+1. Start MySQL server
+2. Start Ollama (if using AI features):
 ```bash
-# If tmux session is unresponsive
-tmux kill-session -t privnurse
-./start_privnurse.sh
-
-# Reload tmux configuration
-tmux source-file ~/.tmux.conf
-
-# Check tmux version
-tmux -V
+ollama serve
+```
+3. Start backend:
+```bash
+cd backend
+python main.py
+```
+4. Start frontend:
+```bash
+cd frontend
+npm run dev
 ```
 
----
+### 📦 Production Build
 
-## 📚 Related Resources
+Frontend:
+```bash
+cd frontend
+npm run build
+npm start
+```
 
-* [Next.js Documentation](https://nextjs.org/docs)
-* [Docker Installation Guide](https://weilin1205.github.io/posts/docker/)
-* [Ollama Official Website](https://ollama.com/)
-* [MySQL Documentation](https://dev.mysql.com/doc/)
+Backend:
+```bash
+cd backend
+python main.py
+```
+
+## ✨ Features
+
+- **Patient Management**: Register and manage patient records
+- **Consultation System**: Record medical consultations and diagnoses
+- **Nursing Records**: Track vital signs and nursing care
+- **Laboratory Results**: Manage lab test results
+- **Discharge Management**: Handle patient discharge summaries
+- **AI Assistant**: Get AI-powered medical insights and recommendations
+- **Audio Transcription**: Convert voice recordings to text via Gemma-3n FastAPI server
+- **Demo Mode**: Test the system without modifying real data
+- **Multi-user Support**: Role-based access control for administrators and users
+
+## 🔑 Default Credentials
+
+After initialization, use these credentials:
+- Username: `admin`
+- Password: `password`
+
+**Important**: Change the default password immediately after first login.
+
+## 🚨 Troubleshooting
+
+### Database Connection Issues
+- Verify MySQL is running
+- Check database credentials in `.env`
+- Ensure database exists: `CREATE DATABASE inference_db;`
+
+### Ollama Connection Issues
+- Verify Ollama is installed and running
+- Check the `OLLAMA_BASE_URL` in `.env`
+- Pull required models: `ollama pull <Modle_Name>` (or your preferred model)
+
+### Frontend Connection Issues
+- Verify backend is running on the correct port
+- Check `NEXT_PUBLIC_API_URL` in frontend `.env.local`
+- Clear browser cache and cookies
