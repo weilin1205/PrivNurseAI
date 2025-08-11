@@ -16,7 +16,7 @@
 ## 🚀 Executive Summary
 
 <div align="center">
-  <img src="assets/PrivNurseAI_architecture_0802.png" alt="PrivNurse AI Architecture" width="85%">
+  <img src="assets/PrivNurseAI_architecture_0802.png" alt="PrivNurse AI Architecture" width="95%">
   <p><em>Figure 1: PrivNurse AI System Architecture Overview</em></p>
 </div>
 
