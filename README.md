@@ -145,7 +145,7 @@ Our innovative architecture deploys four specialized models through the Ollama f
 |-----------|---------|-------------|
 | **CPU** | 8+ cores | AMD Ryzen 9 / Intel i9 |
 | **RAM** | 16GB | 32GB+ DDR4/DDR5 |
-| **GPU** | 8GB VRAM | RTX 4090/5090, A100, H100 |
+| **GPU** | 8GB VRAM | RTX 4060Ti/4090, A100, H100 |
 | **Storage** | 50GB | 100GB+ NVMe SSD |
 | **Network** | Stable connection | Gigabit Ethernet |
 
@@ -157,6 +157,32 @@ Our innovative architecture deploys four specialized models through the Ollama f
 - **Docker**: 20.10+ (optional)
 - **Ollama**: Latest version
 - **FFmpeg**: For audio processing
+
+---
+
+## **🛠️ Technology Stack**
+
+### **Core Technologies**
+- **Google Gemma 3n** - Base language model architecture
+- **Hugging Face Transformers** - Model implementation and hosting platform
+- **Ollama** - Local model deployment and inference framework
+
+### **Development Frameworks**
+- **FastAPI** - Backend API development
+- **Next.js** - Frontend web application framework
+- **React** - User interface components
+- **MySQL** - Database management system
+
+### **AI/ML Infrastructure**
+- **PyTorch** - Deep learning framework
+- **Unsloth** - Training optimization library
+- **QLoRA** - Parameter-efficient fine-tuning
+- **llama.cpp** - Model quantization and optimization
+
+### **Supporting Libraries**
+- **FFmpeg** - Audio processing
+- **Transformers** - Model inference
+- **Material-UI & Chakra UI** - Frontend component libraries
 
 ---
 
@@ -536,19 +562,22 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 🙏 Acknowledgments
 
-### Research Contributors
-- **Wei-Lin Wen** - Lead Developer & Researcher
-- **Yu-Yao Tsai** - Co-Developer & Clinical Validation
+## Research Contributors
+
+- **Wei-Lin Wen** - Principal Investigator & AI Research Lead
+  - LLM model training and fine-tuning pipeline development
+  - System architecture design and technical documentation
+  - Research methodology and experimental design
+  - Project demonstration and visual communication
+- **Yu-Yao Tsai** - Lead Software Engineer & System Integration Specialist
+  - Full-stack system development and implementation
+  - Clinical workflow integration and user interface design
+  - Database architecture and API development
+  - Production deployment and system optimization
 
 ### Clinical Partners
 - **Kuang Tien General Hospital** - Clinical deployment and validation
 - **IRB Committee** - Ethical oversight and approval (IRB no.: KTGH 1135)
-
-### Technology Partners
-- **Google** - Gemma 3n model architecture
-- **Hugging Face** - Transformers library and model hosting
-- **Ollama** - Local model deployment framework
-- **Anthropic** - Claude API for training data generation
 
 ### Open Source Community
 - FastAPI, Next.js, React, and all open-source contributors
