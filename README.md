@@ -445,8 +445,8 @@ mysql -u root -p -e "SHOW DATABASES;"
 # Check available models
 ollama list
 
-# Re-pull models if corrupted
-ollama pull gemma-3n-privnurse-consult-summary-v1
+# Re-create models if corrupted
+ollama create gemma-3n-privnurse-note-summary-v1 -f Modelfile_PrivNurse_DischargeNote_Summary_v1
 
 # Verify Ollama service
 curl http://localhost:11434/api/tags
