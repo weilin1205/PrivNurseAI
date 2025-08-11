@@ -1,535 +1,594 @@
 # PrivNurse AI: Revolutionizing Clinical Documentation with On-Device Intelligence
-> Empowering Healthcare Professionals with Secure, Offline-Ready AI that Transforms Medical Documentation While Keeping Patient Data Protected
 
-**Authors: Wei-Lin Wen, Yu-Yao Tsai**
+> **Empowering Healthcare Professionals with Secure, Offline-Ready AI that Transforms Medical Documentation While Keeping Patient Data Protected**
 
-1. **Project Demo Video**: [Youtube Demo Link](https://youtu.be/gfFrrqFYB-s?si=UwFKngUBT0wq_RlK)
-2. **Full Technical Report:** [Technical Report Link](https://github.com/weilin1205/PrivNurseAI/blob/main/PrivNurseAI_Technical_Report.pdf)
-3. **Code Repository:** [github.com/weilin1205/PrivNurseAI](https://github.com/weilin1205/PrivNurseAI/tree/main)
-4. **Key Components:** [Speech-to-Text Server](https://github.com/weilin1205/PrivNurseAI/tree/main/ExpertAgentC_LLMServer_Nursing_Note_STT) | [Data Preprocessing](https://github.com/weilin1205/PrivNurseAI/tree/main/Data_Preprocessing) | [Model Fine-tuning](https://github.com/weilin1205/PrivNurseAI/tree/main/FineTuning_Training) | [Teacher-Student Distillation](https://github.com/weilin1205/PrivNurseAI/tree/main/Training_Data_Distillation) | [Implementation](https://github.com/weilin1205/PrivNurseAI/tree/main/privnurse_gemma3n)
+[![Demo Video](https://img.shields.io/badge/🎥_Demo_Video-YouTube-red)](https://youtu.be/gfFrrqFYB-s?si=UwFKngUBT0wq_RlK)
+[![Technical Report](https://img.shields.io/badge/📄_Technical_Report-PDF-blue)](https://github.com/weilin1205/PrivNurseAI/blob/main/PrivNurseAI_Technical_Report.pdf)
+[![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-14+-black.svg)](https://nextjs.org/)
 
-## **🚀 Executive Summary**
-
-<img src="/assets/PrivNurseAI_architecture_0802.png" alt="Architecture" style="zoom:85%;" />
-
-PrivNurse AI is an end-to-end, on-premises artificial intelligence system designed to combat one of the most pressing issues in modern healthcare: clinician burnout driven by administrative overload. By harnessing the unparalleled on-device efficiency and multimodal capabilities of Google's Gemma 3n, PrivNurse AI empowers nurses and physicians by automating and accelerating the creation of complex clinical documentation. The system features three core modules: an intelligent **Consultation Note Summarizer** that uses Chain-of-Thought reasoning to discern clinical priorities, a structured **Discharge Note Summarizer**, and a hands-free **Speech-to-Text Nursing Note Transcriber**. Deployed entirely within a hospital's secure network, PrivNurse AI guarantees patient data privacy (HIPAA/GDPR compliance) while delivering clinically-validated, explainable, and continuously improving AI assistance, directly at the point of care.
-
-## The Training Pipeline: Forging a Clinical Expert
-
-<img src="/assets/training_pipeline.png" alt="Trainging_Pipeline" style="zoom:85%;" />
-
-This pipeline transforms the general-purpose Gemma 3n into a highly specialized clinical expert. All training is performed on-site to maintain data integrity.
-
-#### **Step 1: Data Preprocessing**
-We begin with anonymized medical records from our partner hospital. The data undergoes a rigorous preprocessing phase:
-1.  **Data Cleaning:** Removing inconsistencies and artifacts.
-2.  **Standardization:** Aligning terminology and units.
-3.  **Data Integration:** Merging records from disparate sources (e.g., ER, inpatient).
-4.  **Structure Information:** Identifying and tagging sections of the medical record.
-5.  **Data De-identification:** A final, automated and human-verified pass to ensure all PHI is removed, adhering to HIPAA Safe Harbor guidelines.
-
-#### **Step 2: Advanced Data Augmentation**
-This is the core of our innovation. We create high-quality synthetic training data that teaches the model *how* to think, not just *what* to write.
-*   **Medical Structured Chain-of-Thought (MedSCoT) for Task A:** Consultation note summarization is a high-complexity task that demands accurate identification of the *primary* consult reason amid extensive and often noisy patient history. Our approach leverages **Claude-Sonnet-4** as a “teacher model” to produce explicit, medically grounded reasoning chains.  
-
-    **Example:**  
-    > `<thinking>Task: Determine the primary reason for the Rehabilitation Medicine consult and formulate a concise summary. Although the patient was admitted for fever and bronchopneumonia, these conditions are less relevant to the consult. The key driver is swelling and pain on the left side of the neck, likely linked to a gymnastics-related sports injury. This musculoskeletal issue falls within Rehabilitation Medicine's scope and should be prioritized in the summary.</thinking>`  
-
-    Integrating this structured reasoning into the training data enables the model to systematically filter irrelevant clinical details, maintain diagnostic focus, and deliver higher explainability in clinical NLP applications.
-
-*   **Medical Data Distillation for Task B:** For discharge summaries, which require strict adherence to predefined medical documentation structure, we employ **MedGemma-27B-IT** as a teacher model. It is instructed to condense full patient records into summaries covering five essential elements: (1) Primary Diagnosis, (2) Lab/Exam Results, (3) Medications, (4) Consultations, and (5) Follow-up Plan. This structured distillation process produces high-fidelity datasets optimized for fine-tuning models in real-world clinical environments.
-
-#### **Step 3: Parameter-Efficient Fine-Tuning (PEFT)**
-We load the **Gemma-3n-E4B** base model and our augmented training dataset. The fine-tuning process is powered by cutting-edge tools for maximum efficiency:
-*   **Unsloth:** We integrate the Unsloth library to significantly speed up training (up to 1.5x faster) and reduce VRAM usage by over 50%, making iterative fine-tuning highly practical.
-*   **QLoRA (Quantized Low-Rank Adaptation):** We employ SFT (Supervised Fine-Tuning) with the QLoRA technique. This freezes the pretrained model weights and trains a small number of adaptable "LoRA" weights, drastically lowering the computational and memory requirements for training without sacrificing performance.
-
-**Training Hyperparameters:**
-
-| Hyperparameter | Expert Agent-A1 | Expert Agent-A2 | Expert Agent-B1 | Expert Agent-B2 |
-| :--- | :--- | :--- | :--- | :--- |
-| Base Model | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it | unsloth/</br>gemma-3n-E4B-it |
-| LoRA `r` | `32` | `32` | `32` | `32` |
-| LoRA `alpha`| `64` | `64` | `32` | `64` |
-| LoRA Dropout | `0` | `0` | `0` | `0` | 
-| Quantization Bits | `4-bit` | `4-bit` | `4-bit` | `4-bit` |
-| Learning Rate| `1e-3` | `1e-3` | `2e-4` | `2e-4` |
-| Total Batch Size | `96` | `96` | `32` | `32` |
-| Epochs | `6` | `6` | `1` | `2` |
-| Optimizer | `adamw_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused`| `adamw_torch_fused` |
-| Max Sequence Length | `8192` | `8192` | `32768` | `32768` |
-| LR Scheduler Type | `linear` |`linear` |`linear` |`linear` |
-
-#### **Step 4: Model Finalization for Deployment**
-Once training is complete, the LoRA adapter is merged with the base model to create a full, fine-tuned model. To optimize for on-premises inference, we perform two final steps:
-1.  **Format Conversion:** The model is converted from `safetensors` to the **GGUF (GPT-Generated Unified Format)**, which is highly optimized for fast loading and inference with frameworks like Ollama.
-2.  **Quantization:** We use `llama.cpp` to create quantized versions of the model (e.g., Q8_0). This dramatically reduces the model's size and VRAM footprint, making it runnable on a wider range of hospital hardware, from dedicated servers to standard clinician workstations.
-
-
-## The Application Pipeline: AI at the Clinician's Fingertips
-
-<img src="/assets/application_pipeline.png" alt="Application_Pipeline" style="zoom:85%;" />
-
-This pipeline is deployed on-site and handles real-time requests from users.
-
-
-
-
-
-### **The Application Pipeline: AI at the Clinician's Fingertips**
-
-This pipeline is deployed on-site and handles real-time requests from users.
-
-#### **Task A & B: The Dual-Agent Inference System**
-For summarization tasks, we utilize a sophisticated dual-agent architecture deployed on the **Ollama** framework. Ollama manages the local execution of our four fine-tuned GGUF models, dynamically loading and unloading them to efficiently manage VRAM.
-
-1.  **Input Formatting:** For Task B (Discharge Summary), which involves time-sensitive data like lab reports and nursing notes, a `Temporal Data Processor` first sorts these records chronologically. All records are then passed to an `XML Formatter` that wraps the data in semantic tags (e.g., `<PhysicianDiagnosis>`, `<LabReport>`). This structured format helps the LLM better comprehend the complex medical data.
-2.  **Agent Interaction:**
-    *   **Agent 1 (The Summarizer):** First, `Nursing Record Summarization Model` (A1/B1) receives the formatted data and generates the clinical summary.
-    *   **Agent 2 (The Highlighter):** The generated summary and the original source text are passed to the `Medical Record Key Highlighting Model` (A2/B2). This agent's sole purpose is to identify which keywords in the source text support the summary. It outputs its findings as a JSON object mapping summary sentences to source keywords.
-3.  **Output Processing:** The `JSON Match Processor` uses this JSON to apply highlighting to the original medical record in the user interface. The final output presented to the clinician is the AI-generated summary alongside the source text with key evidence highlighted, providing immediate and intuitive explainability.
-
-#### **Task C: Nursing Note Speech-to-Text**
-To leverage Gemma 3n's native multimodal capabilities, which Ollama does not yet support for audio, we built a separate microservice.
-*   **Unlocking Multimodality:** We run the `Nursing Voice Transcription Model` using the **Hugging Face Transformers** library. A **FastAPI** backend serves the model, providing a simple API endpoint for the front end.
-*   **Prompt Engineering for Accuracy:** The backend is engineered with a specific system prompt to prime the model for the clinical context:
-```
-Please transcribe the provided audio into accurate written text. This is a medical/healthcare context where the speaker is a nursing professional.
-
-## Instructions:
-1. Convert the speech to text as accurately as possible
-2. The speaker is a nurse, so expect medical terminology and nursing-related content
-3. You may make minor adjustments to improve clarity and flow while maintaining the original meaning
-4. Correct obvious speech errors, filler words, or unclear pronunciations to create a coherent transcript
-5. Maintain professional medical language and terminology
-6. Ensure the final transcript is readable and well-structured
-
-## Output Requirements:
-- Provide ONLY the clean, transcribed text
-- Do not add commentary, explanations, or additional content
-- Do not include timestamps or speaker labels
-- Present the transcript as a flowing, coherent text document
-
-Please transcribe the audio now.
-```
-*   **Workflow:** The frontend captures audio, sends it to the FastAPI endpoint, and displays the returned text. This simple but powerful feature liberates clinicians' hands and integrates seamlessly into their workflow.
-
-#### **The Human-in-the-Loop: Confirmation and Feedback**
-The user (Resident Physician, Nurse Practitioner, etc.) is always the final authority. They can:
-*   **Confirm & Save:** Accept the AI's output, saving it directly to the Nursing Information System (NIS) or Hospital Information System (HIS).
-*   **Correct & Improve:** Edit the AI-generated text. These corrections are invaluable. They are captured as high-quality, human-verified data and sent to a staging area for the **next round of iterative fine-tuning**. This closed-loop system ensures PrivNurse AI is constantly learning and improving, a critical feature for long-term clinical adoption.
-
-
-# 🏥 PrivNurse Environment Setup and Installation Guide
-
-## 📋 System Architecture Overview
-
-PrivNurse is a complete healthcare system that includes the following four main components:
-
-* **Frontend**: Next.js web application
-* **Backend**: Python Flask/FastAPI server
-* **Database**: MySQL database
-* **AI Model**: Ollama local large language model
+**Authors:** Wei-Lin Wen, Yu-Yao Tsai
 
 ---
 
-## 🖥️ Using Tmux to Manage Services
+## 🚀 Executive Summary
 
-### Tmux Split-Screen Configuration
+<div align="center">
+  <img src="assets/PrivNurseAI_architecture_0802.png" alt="PrivNurse AI Architecture" width="85%">
+  <p><em>Figure 1: PrivNurse AI System Architecture Overview</em></p>
+</div>
 
-After completing the installation of all components, use tmux to manage frontend and backend services simultaneously:
+PrivNurse AI is an end-to-end, on-premises artificial intelligence system designed to combat one of the most pressing issues in modern healthcare: **clinician burnout driven by administrative overload**. By harnessing the unparalleled on-device efficiency and multimodal capabilities of Google's **Gemma 3n**, PrivNurse AI empowers nurses and physicians by automating and accelerating the creation of complex clinical documentation.
 
-#### 1. Create and Configure a Tmux Session
+### 🎯 Core Features
 
-```bash
-# Create a new tmux session (if not already created)
-tmux new-session -d -s privnurse
+The system features three core modules:
 
-# Enter the tmux session
-tmux attach-session -t privnurse
+1. **🩺 Consultation Note Summarizer** - Uses Chain-of-Thought reasoning to discern clinical priorities
+2. **📋 Discharge Note Summarizer** - Generates structured discharge summaries
+3. **🎤 Speech-to-Text Nursing Note Transcriber** - Hands-free clinical documentation
 
-# Rename the current window
-tmux rename-window 'PrivNurse'
-```
+Deployed entirely within a hospital's secure network, PrivNurse AI **guarantees patient data privacy** (HIPAA/GDPR compliance) while delivering clinically-validated, explainable, and continuously improving AI assistance, directly at the point of care.
 
-#### 2. Split the Screen
+### 📊 Clinical Results
 
-```bash
-# Vertically split the screen (left/right)
-# Inside tmux, press Ctrl+B then %
-# Or run the following command
-tmux split-window -h
+Our one-month clinical deployment study at Kuang Tien General Hospital demonstrated exceptional results:
 
-# Horizontally split the right panel (top/bottom)
-# First move to the right panel: Ctrl+B then press →
-# Then press Ctrl+B then "
-tmux split-window -v
-```
-
-#### 3. Panel Configuration and Service Startup
-
-After configuration, there will be three panels:
-
-* **Left panel**: Database management and monitoring
-* **Top right panel**: Backend service
-* **Bottom right panel**: Frontend service
-
-```bash
-# Panel 1 (left) - Database monitoring
-# Move to left panel: Ctrl+B then press ←
-docker ps | grep mysql
-docker logs -f privnurse_mysql
-
-# Panel 2 (top right) - Backend service
-# Move to top right panel: Ctrl+B then press ↑
-cd /path/to/privnurse
-source venv/bin/activate
-python3 local_server.py
-
-# Panel 3 (bottom right) - Frontend service
-# Move to bottom right panel: Ctrl+B then press ↓
-cd /path/to/privnurse
-npm run start
-```
-
-#### 4. Common Tmux Shortcuts
-
-| Shortcut             | Function                                    |
-| -------------------- | ------------------------------------------- |
-| `Ctrl+B` → `%`       | Vertical split                              |
-| `Ctrl+B` → `"`       | Horizontal split                            |
-| `Ctrl+B` → `←/→/↑/↓` | Move between panels                         |
-| `Ctrl+B` → `x`       | Close current panel                         |
-| `Ctrl+B` → `d`       | Detach from session (services keep running) |
-| `Ctrl+B` → `c`       | Create a new window                         |
-| `Ctrl+B` → `,`       | Rename window                               |
-
-#### 5. Service Management Commands
-
-```bash
-# View all tmux sessions
-tmux list-sessions
-
-# Attach to an existing session
-tmux attach-session -t privnurse
-
-# Detach from a session (services keep running)
-# Inside tmux: press Ctrl+B then d
-
-# Completely terminate a session
-tmux kill-session -t privnurse
-
-# View windows in a session
-tmux list-windows -t privnurse
-
-# View panes in a specific window
-tmux list-panes -t privnurse:0
-```
+- **🏆 User Satisfaction**: 9.17/10 average rating
+- **📈 Adoption Rate**: >85% (exceeding industry benchmarks of 60-75%)
+- **⚡ Time Reduction**: 91.7% reduction in documentation time (from 5 minutes to 25 seconds per consultation note)
+- **👥 Study Participants**: 39 nursing staff across 2 nursing stations
+- **📝 Records Processed**: 401 consultation records
 
 ---
 
-## 🚀 Initial Setup
+## 🎬 System Demonstration
 
-### 1. File Preparation
+### Patient Management System
+<div align="center">
+  <img src="assets/Patient_Management_System.png" alt="Patient Management System" width="80%">
+  <p><em>Comprehensive patient data management with intuitive interface</em></p>
+</div>
 
-```bash
-# Clone Repository
-git https://github.com/weilin1205/PrivNurseAI.git
+### Consultation Note Summarization
+<div align="center">
+  <img src="assets/Consulation_Nursing_Note_Summarization.png" alt="Consultation Note Summarization" width="80%">
+  <p><em>AI-powered consultation note summarization with explainable highlighting</em></p>
+</div>
 
-cd PrivNurseAI/privnurse_gemma3n
-```
+### Discharge Note Summarization
+<div align="center">
+  <img src="assets/Discharge_Note_Summarization.png" alt="Discharge Note Summarization" width="80%">
+  <p><em>Structured discharge summary generation from comprehensive medical records</em></p>
+</div>
 
-### 2. Tmux Work Environment Setup
+### Speech-to-Text Transcription
+<div align="center">
+  <img src="assets/Nursing_Note_STT.png" alt="Speech-to-Text" width="80%">
+  <p><em>Hands-free nursing documentation via advanced speech recognition</em></p>
+</div>
 
-```bash
-# Create a new tmux session
-tmux new-session -d -s privnurse
+### AI Model Management
+<div align="center">
+  <img src="assets/AI_Model_Management.png" alt="AI Model Management" width="80%">
+  <p><em>Centralized management of specialized clinical AI models</em></p>
+</div>
 
-# Enter the tmux session
-tmux attach-session -t privnurse
-```
-
----
-
-## 💻 Frontend Setup (Next.js)
-
-### Environment Configuration
-
-1. **Copy environment configuration file**
-
-   ```bash
-   cp .env.local.example .env.local
-   ```
-
-2. **Edit environment variables**
-
-   ```bash
-   nano .env.local
-   ```
-
-   Set the content:
-
-   ```
-   NEXT_PUBLIC_API_URL=http://YOUR_SERVER_IP:8000
-   ```
-
-   > 💡 Replace `YOUR_SERVER_IP` with the actual server IP address, do not add a slash after the URL
-   > 💡 The downloaded file has port 8080 by default, remember to change it
-
-3. **Firewall Configuration**
-
-   ```bash
-   # Ensure the firewall allows access to relevant ports
-   sudo ufw allow 8087  # Frontend port (can be adjusted in package.json)
-   sudo ufw allow 8000  # Backend port (can be changed in local_server.py line 34)
-   ```
-
-### Installation and Startup
-
-```bash
-# Install dependencies
-npm install
-
-# Build the project
-npm run build
-
-# Start the frontend service
-npm run start
-```
+### User Management
+<div align="center">
+  <img src="assets/User_Management.png" alt="User Management" width="80%">
+  <p><em>Role-based access control for healthcare professionals</em></p>
+</div>
 
 ---
 
-## 🐍 Backend Setup (Python)
+## 🏗️ System Architecture
 
-### Environment Configuration
+### Training Pipeline: Forging a Clinical Expert
 
-1. **Copy environment configuration file**
+<div align="center">
+  <img src="assets/training_pipeline.png" alt="Training Pipeline" width="85%">
+  <p><em>Figure 2: Advanced Training Pipeline Architecture</em></p>
+</div>
 
-   ```bash
-   cp .env.example .env
-   ```
+Our comprehensive training pipeline transforms the general-purpose Gemma 3n into a highly specialized clinical expert through four critical stages:
 
-2. **Edit database configuration**
+#### **Stage 1: Data Preprocessing & De-identification**
+- **Data Cleaning**: Removal of incomplete records and inconsistencies
+- **Standardization**: Uniform formatting across different record types
+- **Data Integration**: Consolidation of multi-source medical records
+- **HIPAA Compliance**: Complete de-identification following Safe Harbor guidelines
 
-   ```bash
-   nano .env
-   ```
+#### **Stage 2: Intelligent Data Augmentation**
+- **Medical Structured Chain-of-Thought (MedSCoT)**: Claude-Sonnet-4 generates reasoning chains for consultation prioritization
+- **Medical Data Distillation**: MedGemma-27B-IT creates structured discharge summaries with 5 essential elements
+- **Clinical Reasoning Integration**: Teaching models *how* to think, not just *what* to write
 
-   Set the content:
+#### **Stage 3: Parameter-Efficient Fine-Tuning (PEFT)**
+- **QLoRA Technique**: 4-bit quantization with Low-Rank Adaptation
+- **Unsloth Optimization**: 1.5x faster training with 50% less VRAM usage
+- **Four Specialized Models**: Dedicated agents for summarization and validation tasks
 
-   ```
-   MYSQL_USER=
-   MYSQL_PASSWORD=
-   MYSQL_HOST=localhost
-   MYSQL_PORT=3307
-   MYSQL_DB=inference_db
-   ```
+#### **Stage 4: Deployment Optimization**
+- **Model Merging**: Integration of LoRA adapters with base Gemma-3n-E4B
+- **GGUF Conversion**: Optimization for Ollama framework compatibility
+- **Q8_0 Quantization**: 37.5% VRAM reduction (16GB → 10GB) without accuracy loss
 
-### Python Environment Setup
+### Application Pipeline: AI at the Clinician's Fingertips
 
-#### Method 1: Use existing venv
+<div align="center">
+  <img src="assets/application_pipeline.png" alt="Application Pipeline" width="85%">
+  <p><em>Figure 3: Real-time Clinical Application Architecture</em></p>
+</div>
 
-The downloaded files already include a venv
+#### **Dual-Agent Inference System**
+Our innovative architecture deploys four specialized models through the Ollama framework:
 
+**Task A & B: Document Summarization**
+- **Agent 1 (Summarizer)**: Generates clinical summaries using MedSCoT reasoning
+- **Agent 2 (Highlighter)**: Identifies source evidence and provides explainability
+- **JSON Match Processor**: Creates bidirectional traceability between summaries and source text
+
+**Task C: Multimodal Speech Processing**
+- **Gemma-3n Audio Processing**: FastAPI-based microservice for real-time transcription
+- **Clinical Context Optimization**: Specialized prompts for medical terminology
+- **Hands-free Documentation**: Seamless integration into clinical workflows
+
+---
+
+## 🔧 Technical Requirements
+
+### Hardware Requirements
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| **CPU** | 8+ cores | AMD Ryzen 9 / Intel i9 |
+| **RAM** | 16GB | 32GB+ DDR4/DDR5 |
+| **GPU** | 8GB VRAM | RTX 4090/5090, A100, H100 |
+| **Storage** | 50GB | 100GB+ NVMe SSD |
+| **Network** | Stable connection | Gigabit Ethernet |
+
+### Software Requirements
+- **OS**: Ubuntu 20.04+
+- **Python**: 3.8+
+- **Node.js**: 18+
+- **MySQL**: 5.7+
+- **Docker**: 20.10+ (optional)
+- **Ollama**: Latest version
+- **FFmpeg**: For audio processing
+
+---
+
+## 🚀 Quick Start Installation
+
+### Method 1: Complete System Deployment (Recommended)
+
+#### 1. Clone Repository
 ```bash
-# Activate virtual environment
-source venv/bin/activate  # Linux/Mac
-
-# Start backend server
-python3 local_server.py
+git clone https://github.com/weilin1205/PrivNurseAI.git
+cd PrivNurseAI
 ```
 
-#### Method 2: Create a new venv (if Method 1 fails)
-
+#### 2. Install System Dependencies
 ```bash
-# Remove old virtual environment
-rm -rf venv
+# Ubuntu/Debian
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y python3 python3-pip python3-venv nodejs npm mysql-server
+sudo apt install -y ffmpeg libsndfile1 libasound2-dev portaudio19-dev
 
-# Create a new virtual environment
+# Install NVIDIA drivers (for GPU acceleration)
+sudo apt install -y nvidia-driver-535 nvidia-cuda-toolkit
+
+# Install Ollama and Start Ollama service
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve
+```
+
+#### 3. Setup Backend
+```bash
+cd backend
+
+# Create virtual environment
 python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate  # Linux/Mac
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Start backend server
-python3 local_server.py
+# Configure environment
+cp .env.example .env
+# Edit .env with your MySQL credentials and configuration
 ```
+
+#### 4. Setup Frontend
+```bash
+cd ../frontend
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.local.example .env.local
+# Edit .env.local with your API URL
+```
+
+#### 5. Database Setup
+```bash
+# Start MySQL
+sudo systemctl start mysql
+
+# Create database
+mysql -u root -p
+CREATE DATABASE inference_db;
+EXIT;
+```
+
+#### 6. Start Services
+```bash
+# Terminal 1: Start Backend
+cd backend
+python main.py
+
+# Terminal 2: Start Frontend
+cd frontend
+npm run dev
+
+# Terminal 3: Start Audio API (optional)
+cd ExpertAgentC_LLMServer_Nursing_Note_STT
+./start_api.sh
+```
+
+#### 7. Access Application
+- **Web Interface**: http://localhost:3000
+- **API Documentation**: http://localhost:8000/docs
+- **Audio API**: http://localhost:8444 (if configured)
+
+**Default Login:**
+- Username: `admin`
+- Password: `password`
+
+### Method 2: Component-by-Component Setup
+
+If you prefer to set up individual components, follow these guides:
+
+#### 📊 Data Preprocessing
+```bash
+cd Data_Preprocessing
+pip install rich psutil
+python PrivNurse_data_preprocessing.py
+```
+[📖 Detailed Guide](Data_Preprocessing/README.md)
+
+#### 🧠 Training Data Generation
+```bash
+cd Training_Data_Distillation
+# Generate consultation datasets with Claude
+python privNurse_consult_validation_claude.py
+python privNurse_consult_summary_claude.py
+
+# Generate discharge datasets with MedGemma
+jupyter notebook PrivNurse_note_validation_medgemma.ipynb
+jupyter notebook PrivNurse_note_summary_medgemma.ipynb
+```
+[📖 Detailed Guide](Training_Data_Distillation/README.md)
+
+#### 🎯 Model Fine-tuning
+```bash
+cd FineTuning_Training
+# Fine-tune all four specialized models
+jupyter notebook FineTuning_Gemma3n_PrivNurse_consult_summary.ipynb
+jupyter notebook FineTuning_Gemma3n_PrivNurse_consult_validation.ipynb
+jupyter notebook FineTuning_Gemma3n_PrivNurse_note_summary.ipynb
+jupyter notebook FineTuning_Gemma3n_PrivNurse_note_validation.ipynb
+```
+[📖 Detailed Guide](FineTuning_Training/README.md)
+
+#### 🎤 Speech-to-Text Server
+```bash
+cd ExpertAgentC_LLMServer_Nursing_Note_STT
+chmod +x setup.sh
+./setup.sh
+cd gemma-audio-api
+./start_api.sh
+```
+[📖 Detailed Guide](ExpertAgentC_LLMServer_Nursing_Note_STT/README.md)
+
+#### 🖥️ Main Application
+```bash
+cd privnurse_gemma3n
+# Follow backend and frontend setup as described above
+```
+[📖 Detailed Guide](privnurse_gemma3n/README.md)
 
 ---
 
-## 🗄️ Database Setup (MySQL)
+## 🎯 Training Your Own Models
 
 ### Prerequisites
+- Access to de-identified medical records
+- Institutional Review Board (IRB) approval
+- Computational resources (GPU recommended)
+- Hugging Face access token
 
-Ensure Docker is installed:
-
-* [Docker Installation Guide](https://weilin1205.github.io/posts/docker/)
-
-### Installation and Startup
-
+### Step 1: Data Preparation
 ```bash
-# Start MySQL container
-docker run -d \
-  --name privnurse_mysql \
-  -e MYSQL_ROOT_PASSWORD=my-secret-pw \
-  -e MYSQL_DATABASE=inference_db \
-  -p 3307:3306 \
-  --restart unless-stopped \
-  mysql:latest
+cd Data_Preprocessing
+python PrivNurse_data_preprocessing.py
 ```
 
-> ⚠️ **Important**: Replace `my-secret-pw` with a secure password and fill it in the `.env` file
+### Step 2: Generate Training Datasets
+```bash
+cd Training_Data_Distillation
+
+# For consultation tasks (requires Claude API access)
+python privNurse_consult_validation_claude.py
+python privNurse_consult_summary_claude.py
+
+# For discharge tasks (requires MedGemma access)
+jupyter notebook PrivNurse_note_validation_medgemma.ipynb
+jupyter notebook PrivNurse_note_summary_medgemma.ipynb
+```
+
+### Step 3: Fine-tune Models
+```bash
+cd FineTuning_Training
+
+# Train all four specialized models
+jupyter notebook FineTuning_Gemma3n_PrivNurse_consult_summary.ipynb
+jupyter notebook FineTuning_Gemma3n_PrivNurse_consult_validation.ipynb
+jupyter notebook FineTuning_Gemma3n_PrivNurse_note_summary.ipynb
+jupyter notebook FineTuning_Gemma3n_PrivNurse_note_validation.ipynb
+```
+
+### Step 4: Deploy to Ollama
+```bash
+# Import trained models
+ollama create gemma-3n-privnurse-consult-summary-v1 -f Modelfile_PrivNurse_Consultation_Summary_v1
+ollama create gemma-3n-privnurse-consult-validation-v1 -f Modelfile_PrivNurse_Consultation_Validation_v1
+ollama create gemma-3n-privnurse-note-summary-v1 -f Modelfile_PrivNurse_DischargeNote_Summary_v1
+ollama create gemma-3n-privnurse-note-validation-v1 -f Modelfile_PrivNurse_DischargeNote_Validation_v1
+```
 
 ---
 
-## 🤖 AI Model Setup (Ollama)
+## 🔒 Security & Privacy
 
-### Install Ollama
+### HIPAA/GDPR Compliance
+- ✅ **On-device Processing**: All AI inference occurs locally
+- ✅ **Data De-identification**: Complete PII removal following Safe Harbor guidelines
+- ✅ **Encrypted Storage**: All patient data encrypted at rest
+- ✅ **Audit Trails**: Comprehensive logging of all system interactions
+- ✅ **Access Controls**: Role-based permissions and authentication
 
+### Network Security
+- 🔐 **Firewall Configuration**: Restricted port access
+- 🔐 **API Authentication**: Bearer token security
+- 🔐 **Rate Limiting**: Protection against abuse
+- 🔐 **HTTPS Support**: Encrypted communications
+
+---
+
+## 🧪 Testing & Validation
+
+### Running Tests
 ```bash
-# Run automatic installation script
-curl -fsSL https://ollama.com/install.sh | sh
+# Backend API tests
+cd backend
+python -m pytest tests/
+
+# Frontend component tests
+cd frontend
+npm test
+
+# Audio API tests
+cd ExpertAgentC_LLMServer_Nursing_Note_STT
+python test_api.py
 ```
 
-### Model Download and Configuration (Example)
-
+### Performance Benchmarks
 ```bash
-# Download summary model (name contains "summary")
-ollama pull llama2-summary
+# System resource monitoring
+htop
+nvidia-smi
 
-# Download validation model (name contains "validation")
-ollama pull llama2-validation
+# API response time testing
+curl -w "@curl-format.txt" -o /dev/null -s http://localhost:8000/health
 ```
 
 ---
 
-## 🎯 System Usage Instructions
+## 🚨 Troubleshooting
 
-### Model Selection Rules
+### Common Issues and Solutions
 
-After installation, the system's model page will display two selection areas:
-
-1. **Summary model field**
-
-   * Displays Ollama models with names containing `summary`
-   * Used for document summarization
-
-2. **Highlight model field**
-
-   * Displays Ollama models with names containing `validation`
-   * Used for content validation and annotation
-
-### Startup Order
-
-It is recommended to use tmux to manage the service startup order:
-
-1. **Start database service** (left panel)
-
-   ```bash
-   docker start privnurse_mysql
-   ```
-
-2. **Start backend service** (top right panel)
-
-   ```bash
-   source venv/bin/activate
-   python3 local_server.py
-   ```
-
-3. **Start frontend service** (bottom right panel)
-
-   ```bash
-   npm run start
-   ```
-
-4. **Check Ollama service**
-
-   ```bash
-   ollama serve  # If not already running
-   ```
-
-### Access the System
-
-* Frontend page: `http://localhost:8087`
-* Backend API: `http://localhost:8000`
-* Database: `localhost:3307`
-
-### Port Configuration
-
-* **Frontend port 8087**: adjustable in `package.json` scripts
-* **Backend port 8000**: changeable in `local_server.py` line 34
-* **Database port 3307**: avoids conflict with default MySQL port
-
----
-
-## 🔧 Common Troubleshooting
-
-### Port Conflicts
-
+#### Database Connection Problems
 ```bash
-# Check port usage
-sudo netstat -tlnp | grep :8087
-sudo netstat -tlnp | grep :8000
-sudo netstat -tlnp | grep :3307
+# Check MySQL status
+sudo systemctl status mysql
 
-# To modify port settings:
-# Frontend: edit start script in package.json
-# Backend: edit line 34 in local_server.py
+# Reset MySQL password
+sudo mysql_secure_installation
+
+# Verify database exists
+mysql -u root -p -e "SHOW DATABASES;"
 ```
 
-### Service Status Check
-
+#### Ollama Model Issues
 ```bash
-# Check Docker container status
-docker ps
-
-# Check Ollama service
+# Check available models
 ollama list
 
-# Check Python processes
-ps aux | grep python
+# Re-pull models if corrupted
+ollama pull gemma-3n-privnurse-consult-summary-v1
 
-# Check all panel statuses in tmux
-tmux list-panes -t privnurse -F "#{pane_index}: #{pane_current_command}"
+# Verify Ollama service
+curl http://localhost:11434/api/tags
 ```
 
-### Log Viewing
-
+#### GPU Memory Issues
 ```bash
-# View Docker container logs
-docker logs privnurse_mysql
+# Check GPU usage
+nvidia-smi
 
-# View Next.js logs
-npm run start --verbose
-
-# In tmux, view service logs in real-time
-# Left panel: docker logs -f privnurse_mysql
-# Top right panel: backend service console output
-# Bottom right panel: frontend service console output
+# Clear GPU memory
+sudo fuser -v /dev/nvidia*
+sudo kill -9 <PID>
 ```
 
-### Tmux Troubleshooting
-
+#### Audio Processing Problems
 ```bash
-# If tmux session is unresponsive
-tmux kill-session -t privnurse
-./start_privnurse.sh
+# Verify FFmpeg installation
+ffmpeg -version
 
-# Reload tmux configuration
-tmux source-file ~/.tmux.conf
+# Check audio file permissions
+ls -la /path/to/audio/files
 
-# Check tmux version
-tmux -V
+# Test audio processing
+curl -X POST -F "audio_file=@test.wav" http://localhost:8444/generate/audio-text
 ```
 
 ---
 
-## 📚 Related Resources
+## 📊 Performance Optimization
 
-* [Next.js Documentation](https://nextjs.org/docs)
-* [Docker Installation Guide](https://weilin1205.github.io/posts/docker/)
-* [Ollama Official Website](https://ollama.com/)
-* [MySQL Documentation](https://dev.mysql.com/doc/)
+### Model Optimization
+```bash
+# Enable 8-bit quantization
+export CUDA_VISIBLE_DEVICES=0
+export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+```
+
+### Database Optimization
+```sql
+-- Optimize MySQL for better performance
+SET GLOBAL innodb_buffer_pool_size = 2G;
+SET GLOBAL query_cache_size = 268435456;
+CREATE INDEX idx_patient_id ON consultations(patient_id);
+```
+
+### System Tuning
+```bash
+# Increase file descriptor limits
+echo "* soft nofile 65536" | sudo tee -a /etc/security/limits.conf
+echo "* hard nofile 65536" | sudo tee -a /etc/security/limits.conf
+
+# Optimize kernel parameters
+echo "net.core.somaxconn = 65535" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+---
+
+## 📚 Documentation
+
+### Complete Documentation Set
+- 📋 **[Data Preprocessing Guide](Data_Preprocessing/README.md)** - Clean and prepare medical records
+- 🧠 **[Training Data Generation](Training_Data_Distillation/README.md)** - Create specialized training datasets
+- 🎯 **[Model Fine-tuning Guide](FineTuning_Training/README.md)** - Train your clinical expert models
+- 🎤 **[Speech-to-Text Server](ExpertAgentC_LLMServer_Nursing_Note_STT/README.md)** - Deploy multimodal capabilities
+- 🖥️ **[Main Application Guide](privnurse_gemma3n/README.md)** - Run the complete system
+- 📄 **[Technical Report](https://github.com/weilin1205/PrivNurseAI/blob/main/PrivNurseAI_Technical_Report.pdf)** - Comprehensive technical details
+
+### API Documentation
+- **Backend API**: http://localhost:8000/docs (Swagger UI)
+- **Audio API**: http://localhost:8444/docs (FastAPI docs)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the healthcare AI community!
+
+### Getting Started
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow existing code style and conventions
+- Add tests for new functionality
+- Update documentation for API changes
+- Ensure HIPAA compliance for any healthcare-related features
+
+### Areas for Contribution
+- 🧠 Additional clinical specialties (cardiology, oncology, etc.)
+- 🌐 Multi-language support
+- 📱 Mobile application development
+- 🔧 Performance optimizations
+- 🧪 Additional test coverage
+
+---
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+### Third-Party Licenses
+- Gemma 3n: [Gemma Terms of Use](https://ai.google.dev/gemma/terms)
+- Ollama: [Apache License 2.0](https://github.com/ollama/ollama/blob/main/LICENSE)
+- FastAPI: [MIT License](https://github.com/tiangolo/fastapi/blob/master/LICENSE)
+- Next.js: [MIT License](https://github.com/vercel/next.js/blob/canary/license.md)
+
+---
+
+## 🙏 Acknowledgments
+
+### Research Contributors
+- **Wei-Lin Wen** - Lead Developer & Researcher
+- **Yu-Yao Tsai** - Co-Developer & Clinical Validation
+
+### Clinical Partners
+- **Kuang Tien General Hospital** - Clinical deployment and validation
+- **IRB Committee** - Ethical oversight and approval (IRB no.: KTGH 1135)
+
+### Technology Partners
+- **Google** - Gemma 3n model architecture
+- **Hugging Face** - Transformers library and model hosting
+- **Ollama** - Local model deployment framework
+- **Anthropic** - Claude API for training data generation
+
+### Open Source Community
+- FastAPI, Next.js, React, and all open-source contributors
+- The healthcare AI research community
+
+---
+
+## 📞 Support & Contact
+
+### Documentation & Issues
+- 📖 **Documentation**: [Complete Deployment Guide](https://github.com/weilin1205/PrivNurseAI/tree/main)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/weilin1205/PrivNurseAI/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/weilin1205/PrivNurseAI/discussions)
+
+### Research Collaboration
+For research collaborations, clinical partnerships, or enterprise deployment inquiries:
+- 📧 Email: [Contact via GitHub Issues](https://github.com/weilin1205/PrivNurseAI/issues)
+- 📄 Technical Report: [Full PDF](https://github.com/weilin1205/PrivNurseAI/blob/main/PrivNurseAI_Technical_Report.pdf)
+
+### Citation
+If you use PrivNurse AI in your research, please cite:
+```bibtex
+@misc{wen2025privnurse,
+  title={PrivNurse AI: Revolutionizing Clinical Documentation with On-Device Intelligence},
+  author={Wei-Lin Wen and Yu-Yao Tsai},
+  year={2025},
+  url={https://github.com/weilin1205/PrivNurseAI}
+}
+```
+
+---
+
+<div align="center">
+
+**PrivNurse AI - Transforming Healthcare Documentation, One Note at a Time** 🏥✨
+
+[![Star this repo](https://img.shields.io/github/stars/weilin1205/PrivNurseAI?style=social)](https://github.com/weilin1205/PrivNurseAI/stargazers)
+[![Fork this repo](https://img.shields.io/github/forks/weilin1205/PrivNurseAI?style=social)](https://github.com/weilin1205/PrivNurseAI/network/members)
+[![Watch this repo](https://img.shields.io/github/watchers/weilin1205/PrivNurseAI?style=social)](https://github.com/weilin1205/PrivNurseAI/watchers)
+
+*Empowering healthcare professionals with secure, explainable AI that keeps patient data private while revolutionizing clinical workflows.*
+
+</div>
