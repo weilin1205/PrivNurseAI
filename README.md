@@ -562,19 +562,6 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 🙏 Acknowledgments
 
-## Research Contributors
-
-- **Wei-Lin Wen** - Principal Investigator & AI Research Lead
-  - LLM model training and fine-tuning pipeline development
-  - System architecture design and technical documentation
-  - Research methodology and experimental design
-  - Project demonstration and visual communication
-- **Yu-Yao Tsai** - Lead Software Engineer & System Integration Specialist
-  - Full-stack system development and implementation
-  - Clinical workflow integration and user interface design
-  - Database architecture and API development
-  - Production deployment and system optimization
-
 ### Clinical Partners
 - **Kuang Tien General Hospital** - Clinical deployment and validation
 - **IRB Committee** - Ethical oversight and approval (IRB no.: KTGH 1135)
